@@ -3,12 +3,14 @@ package com.samschu.cs4520.weather.model
 import com.samschu.cs4520.weather.BuildConfig
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Query
 
 object Api {
-    const val API_KEY = BuildConfig.OPEN_WEATHER_API_KEY
+    private const val API_KEY = BuildConfig.OPEN_WEATHER_API_KEY
     const val BASE_URL = "https://api.openweathermap.org/"
-    const val WEATHER_DATA_ENDPOINT = "data/3.0/onecall"
-    const val GEOCODING_ENDPOINT = "geo/1.0/direct"
+    const val WEATHER_DATA_ENDPOINT = "data/3.0/onecall?units=imperial&exclude=minutely,alerts&appid=$API_KEY"
+    const val GEOCODING_ENDPOINT = "geo/1.0/direct?limit=1&appid=$API_KEY"
 }
 
 /**
@@ -38,5 +40,14 @@ object RetrofitBuilder {
  * Defines the operations that can be performed to interact with the server API.
  */
 interface ApiService {
+    @GET(Api.WEATHER_DATA_ENDPOINT)
+    suspend fun getWeatherData(
+        @Query("lat") latitude: Double,
+        @Query("lon") longitude: Double
+    ): WeatherData
 
+    @GET(Api.GEOCODING_ENDPOINT)
+    suspend fun getCoordinates(
+        @Query("q") locSpecifier: String
+    ): List<LocationCoordinates>
 }
