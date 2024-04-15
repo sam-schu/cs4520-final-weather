@@ -1,4 +1,4 @@
-package com.samschu.cs4520.weather.ui
+package com.samschu.cs4520.weather.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
