@@ -65,7 +65,7 @@ fun LocationScreen(
         )
         Spacer(modifier = Modifier.height(10.dp))
         Button(onClick = {
-            vm.currentLocationIndex.intValue = newLocationIndex
+            vm.updateCurrentLocation(newLocationIndex)
         }) {
             Text(
                 text = "Update",
