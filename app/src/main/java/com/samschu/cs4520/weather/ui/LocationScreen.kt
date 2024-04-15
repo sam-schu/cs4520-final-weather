@@ -27,13 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.samschu.cs4520.weather.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationScreen() {
-    val locationOptions = stringArrayResource(R.array.location_options)
-
-    var newLocation by remember { mutableStateOf(locationOptions.first()) }
-    var dropdownExpanded by remember { mutableStateOf(false) }
+    var newLocation by remember { mutableStateOf("Boston, MA") }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -55,42 +51,58 @@ fun LocationScreen() {
             text = "New Location:",
             fontSize = 26.sp
         )
-        ExposedDropdownMenuBox(
-            expanded = dropdownExpanded,
-            onExpandedChange = { dropdownExpanded = !dropdownExpanded }
-        ) {
-            OutlinedTextField(
-                value = newLocation,
-                onValueChange = {},
-                readOnly = true,
-                textStyle = LocalTextStyle.current.copy(fontSize = 18.sp),
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded)
-                },
-                modifier = Modifier
-                    .menuAnchor()
-            )
-            ExposedDropdownMenu(
-                expanded = dropdownExpanded,
-                onDismissRequest = { dropdownExpanded = false }
-            ) {
-                locationOptions.forEach {
-                    DropdownMenuItem(
-                        text = { Text(text = it) },
-                        onClick = {
-                            newLocation = it
-                            dropdownExpanded = false
-                        }
-                    )
-                }
-            }
-        }
+        LocationSelectionDropdown(
+            value = newLocation,
+            onValueChange = { newLocation = it }
+        )
         Spacer(modifier = Modifier.height(10.dp))
         Button(onClick = {}) {
             Text(
                 text = "Update",
                 fontSize = 22.sp
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LocationSelectionDropdown(
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+    var dropdownExpanded by remember { mutableStateOf(false) }
+
+    val locationOptions = stringArrayResource(R.array.location_options)
+
+    ExposedDropdownMenuBox(
+        expanded = dropdownExpanded,
+        onExpandedChange = { dropdownExpanded = !dropdownExpanded }
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = {},
+            readOnly = true,
+            textStyle = LocalTextStyle.current.copy(fontSize = 18.sp),
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded)
+            },
+            modifier = Modifier
+                .menuAnchor()
+        )
+        ExposedDropdownMenu(
+            expanded = dropdownExpanded,
+            onDismissRequest = { dropdownExpanded = false }
+        ) {
+            locationOptions.forEach {
+                DropdownMenuItem(
+                    text = { Text(text = it) },
+                    onClick = {
+                        dropdownExpanded = false
+                        onValueChange(it)
+                    }
+                )
+            }
         }
     }
 }
