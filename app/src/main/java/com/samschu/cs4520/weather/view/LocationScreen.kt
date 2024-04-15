@@ -15,6 +15,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,11 +26,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.samschu.cs4520.weather.R
+import com.samschu.cs4520.weather.viewmodel.WeatherViewModel
 
 @Composable
-fun LocationScreen() {
-    var newLocation by remember { mutableStateOf("Boston, MA") }
+fun LocationScreen(
+    vm: WeatherViewModel = viewModel()
+) {
+    var newLocationIndex by remember { mutableIntStateOf(vm.currentLocationIndex.intValue) }
+
+    val locationOptions = stringArrayResource(R.array.location_options)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -42,7 +49,7 @@ fun LocationScreen() {
             fontSize = 26.sp
         )
         Text(
-            text = "Boston, MA",
+            text = locationOptions[vm.currentLocationIndex.intValue],
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold
         )
@@ -52,11 +59,14 @@ fun LocationScreen() {
             fontSize = 26.sp
         )
         LocationSelectionDropdown(
-            value = newLocation,
-            onValueChange = { newLocation = it }
+            selectedIndex = newLocationIndex,
+            onSelectedIndexChange = { newLocationIndex = it },
+            locationOptions = locationOptions
         )
         Spacer(modifier = Modifier.height(10.dp))
-        Button(onClick = {}) {
+        Button(onClick = {
+            vm.currentLocationIndex.intValue = newLocationIndex
+        }) {
             Text(
                 text = "Update",
                 fontSize = 22.sp
@@ -68,19 +78,18 @@ fun LocationScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationSelectionDropdown(
-    value: String,
-    onValueChange: (String) -> Unit
+    selectedIndex: Int,
+    onSelectedIndexChange: (Int) -> Unit,
+    locationOptions: Array<String>
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
-
-    val locationOptions = stringArrayResource(R.array.location_options)
 
     ExposedDropdownMenuBox(
         expanded = dropdownExpanded,
         onExpandedChange = { dropdownExpanded = !dropdownExpanded }
     ) {
         OutlinedTextField(
-            value = value,
+            value = locationOptions[selectedIndex],
             onValueChange = {},
             readOnly = true,
             textStyle = LocalTextStyle.current.copy(fontSize = 18.sp),
@@ -94,12 +103,12 @@ fun LocationSelectionDropdown(
             expanded = dropdownExpanded,
             onDismissRequest = { dropdownExpanded = false }
         ) {
-            locationOptions.forEach {
+            locationOptions.forEachIndexed { index, locationName ->
                 DropdownMenuItem(
-                    text = { Text(text = it) },
+                    text = { Text(text = locationName) },
                     onClick = {
                         dropdownExpanded = false
-                        onValueChange(it)
+                        onSelectedIndexChange(index)
                     }
                 )
             }
