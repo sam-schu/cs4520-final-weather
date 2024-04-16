@@ -70,9 +70,7 @@ class WeatherViewModel: ViewModel() {
         val locationSpecifier = LOCATION_SPECIFIERS[_currentLocationIndex.intValue]
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val (lat, lon) = apiService.getCoordinates(
-                    locationSpecifier
-                )[0]
+                val (lat, lon) = apiService.getCoordinates(locationSpecifier).first()
                 val weatherData = apiService.getWeatherData(lat, lon)
                 withContext(Dispatchers.Main) {
                     _currentWeatherData.value = WeatherDataResult.Success(weatherData.current)
