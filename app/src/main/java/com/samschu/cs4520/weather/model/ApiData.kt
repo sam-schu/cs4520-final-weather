@@ -3,6 +3,7 @@ package com.samschu.cs4520.weather.model
 import com.google.gson.annotations.SerializedName
 
 data class WeatherData(
+    @SerializedName("timezone_offset") val timezoneOffset: Int,
     val current: CurrentWeatherData,
     val hourly: List<HourlyWeatherData>,
     val daily: List<DailyWeatherData>

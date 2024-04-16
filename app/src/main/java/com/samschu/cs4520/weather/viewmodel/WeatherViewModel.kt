@@ -16,6 +16,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.net.UnknownHostException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
+
+data class FormattedHourlyWeatherData(
+    val time: String,
+    val conditionsIconId: String,
+    val precipChance: Double,
+    val temp: Double
+)
 
 sealed interface WeatherDataResult<out T> {
     data object Loading : WeatherDataResult<Nothing>
@@ -28,9 +39,10 @@ class WeatherViewModel: ViewModel() {
     private val _currentWeatherData = mutableStateOf<WeatherDataResult<CurrentWeatherData>>(
         WeatherDataResult.Loading
     )
-    private val _hourlyWeatherData = mutableStateOf<WeatherDataResult<List<HourlyWeatherData>>>(
-        WeatherDataResult.Loading
-    )
+    private val _hourlyWeatherData =
+        mutableStateOf<WeatherDataResult<List<FormattedHourlyWeatherData>>>(
+            WeatherDataResult.Loading
+        )
     private val _dailyWeatherData = mutableStateOf<WeatherDataResult<List<DailyWeatherData>>>(
         WeatherDataResult.Loading
     )
@@ -38,7 +50,7 @@ class WeatherViewModel: ViewModel() {
     val currentLocationIndex: IntState = _currentLocationIndex
     val currentWeatherData: MutableState<WeatherDataResult<CurrentWeatherData>> =
         _currentWeatherData
-    val hourlyWeatherData: MutableState<WeatherDataResult<List<HourlyWeatherData>>> =
+    val hourlyWeatherData: MutableState<WeatherDataResult<List<FormattedHourlyWeatherData>>> =
         _hourlyWeatherData
     val dailyWeatherData: MutableState<WeatherDataResult<List<DailyWeatherData>>> =
         _dailyWeatherData
@@ -64,7 +76,11 @@ class WeatherViewModel: ViewModel() {
                 val weatherData = apiService.getWeatherData(lat, lon)
                 withContext(Dispatchers.Main) {
                     _currentWeatherData.value = WeatherDataResult.Success(weatherData.current)
-                    _hourlyWeatherData.value = WeatherDataResult.Success(weatherData.hourly)
+                    _hourlyWeatherData.value = WeatherDataResult.Success(
+                        weatherData.hourly.map {
+                            formatHourlyWeatherData(it, weatherData.timezoneOffset)
+                        }
+                    )
                     _dailyWeatherData.value = WeatherDataResult.Success(weatherData.daily)
                 }
             } catch (e: HttpException) {
@@ -79,6 +95,32 @@ class WeatherViewModel: ViewModel() {
             }
         }
     }
+
+    private fun formatHourlyWeatherData(
+        wd: HourlyWeatherData, timezoneOffset: Int
+    ): FormattedHourlyWeatherData =
+        FormattedHourlyWeatherData(
+            getFormattedTime(wd.dt + timezoneOffset),
+            wd.weather.first().icon,
+            wd.pop,
+            wd.temp
+        )
+
+    // Returns a string in the device locale in the form of "12 AM"
+    // or "1 PM" representing the given UNIX timestamp (in seconds),
+    // without performing any time zone conversions.
+    private fun getFormattedTime(unixTimestampSeconds: Int): String =
+        // Note: The time zone is not set to UTC because we want the
+        // time to be displayed in UTC, but because this will disable
+        // automatic time zone conversion (since the Date class
+        // constructor takes a timestamp assumed to be in UTC). This
+        // way, the time zone of the time provided to the method is
+        // preserved.
+        Date(unixTimestampSeconds * 1000L).let {
+            SimpleDateFormat("h a", Locale.getDefault()).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }.format(it)
+        }
 
     private fun updateAllWeatherData(value: WeatherDataResult<Nothing>) {
         _currentWeatherData.value = value
