@@ -131,6 +131,5 @@ fun HourWeatherPreview() {
         "10d",
         0.6,
         61.0
-    )
-    )
+    ))
 }
