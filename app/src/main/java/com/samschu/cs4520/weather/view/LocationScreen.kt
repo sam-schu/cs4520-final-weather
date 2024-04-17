@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,7 +52,9 @@ fun LocationScreen(
         Text(
             text = locationOptions[vm.currentLocationIndex.intValue],
             fontSize = 26.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .testTag("current location text")
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
@@ -86,7 +89,9 @@ fun LocationSelectionDropdown(
 
     ExposedDropdownMenuBox(
         expanded = dropdownExpanded,
-        onExpandedChange = { dropdownExpanded = !dropdownExpanded }
+        onExpandedChange = { dropdownExpanded = !dropdownExpanded },
+        modifier = Modifier
+            .testTag("new location dropdown")
     ) {
         OutlinedTextField(
             value = locationOptions[selectedIndex],
