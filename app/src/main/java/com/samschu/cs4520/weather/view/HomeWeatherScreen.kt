@@ -1,4 +1,4 @@
-package com.samschu.cs4520.weather.ui
+package com.samschu.cs4520.weather.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,13 +16,23 @@ import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import androidx.compose.foundation.Image
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.samschu.cs4520.weather.R
-
+import com.samschu.cs4520.weather.viewmodel.WeatherDataResult
+import com.samschu.cs4520.weather.viewmodel.WeatherViewModel
 
 @Composable
-fun HomeScreen() {
-    val location = "New York" // Example location, you can replace it with dynamic data
+fun HomeScreen(
+    navController: NavHostController,
+    viewModel: WeatherViewModel = viewModel()
+) {
+    val currentWeatherData = viewModel.currentWeatherData.value
+    val dailyWeatherData = viewModel.dailyWeatherData.value
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -35,25 +45,151 @@ fun HomeScreen() {
             modifier = Modifier.padding(16.dp)
         )
 
-        LocationSection(location = location, onClick = { /* Handle click to navigate to location screen */ })
+        // Trigger navigation to the Location screen when LocationSection is clicked
+        LocationSection(location = "New York") {
+            navController.navigate(NavigationItem.Location.route)
+        }
 
-        TodayInfoBox(onClick = { /* Handle click to navigate to today's information screen */ })
+        // Trigger navigation to the TodayWeatherDetailsScreen when TodayInfoBox is clicked
+        TodayInfoBox {
+            navController.navigate(NavigationItem.Details.route)
+        }
 
-        WeatherBox(
-            conditions = "Sunny", // Example weather conditions
-            currTemp = 75, // Example current temperature
-            minTemp = 60, // Example minimum temperature
-            maxTemp = 80, // Example maximum temperature
-            feelsLikeTemp = 80, // Example the feels like temperature
-            weatherIconUrl = "https://openweathermap.org/img/wn/01d.png", // Example weather icon URL
-            onClick = { /* Handle click to show weather details */ },
-            modifier = Modifier.padding(16.dp)
-        )
+        when {
+            currentWeatherData is WeatherDataResult.Loading -> {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            currentWeatherData is WeatherDataResult.Error -> {
+                Text(
+                    text = "Error loading weather data.",
+                    textAlign = TextAlign.Center,
+                    fontSize = 22.sp,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            currentWeatherData is WeatherDataResult.Success && dailyWeatherData is WeatherDataResult.Success -> {
+                val currentWeather = currentWeatherData.data
+                val dailyWeather = dailyWeatherData.data.firstOrNull()
 
-        ForecastBox(onClick = { /* Handle click to navigate to today's information screen */ })
+                if (dailyWeather != null) {
+                    WeatherBox(
+                        conditions = currentWeather.weather[0].main,
+                        currTemp = currentWeather.temp.toInt(),
+                        maxTemp = dailyWeather.temp.max.toInt(),
+                        minTemp = dailyWeather.temp.min.toInt(),
+                        feelsLikeTemp = currentWeather.feelsLike.toInt(),
+                        weatherIconUrl = "https://openweathermap.org/img/wn/${currentWeather.weather[0].icon}.png",
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+        }
+
+        // Trigger navigation to the HourlyScreen when ForecastBox is clicked
+        ForecastBox {
+            navController.navigate(NavigationItem.HourlyForecast.route)
+        }
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+fun TodayWeather(
+    conditions: String,
+    currTemp: Int,
+    feelsLikeTemp: Int,
+    minTemp: Int,
+    maxTemp: Int,
+    weatherIconUrl: String,
+    modifier: Modifier = Modifier
+) {
+    if (conditions.isNotEmpty() && currTemp != 0 && feelsLikeTemp != 0 && minTemp != 0 && maxTemp != 0 && weatherIconUrl.isNotEmpty()) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = modifier
+                .padding(16.dp)
+                .background(color = Color.Blue.copy(alpha = 0.5f), shape = MaterialTheme.shapes.medium)
+                .padding(16.dp)
+        ) {
+            // Display today's weather conditions
+            Text(
+                text = "Today's Weather: $conditions",
+                fontSize = 20.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            // Display current temperature
+            Text(
+                text = "Current Temperature: $currTemp°F",
+                fontSize = 24.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            // Display weather icon using GlideImage
+            GlideImage(
+                model = weatherIconUrl,
+                contentDescription = "Weather Icon",
+                modifier = Modifier.size(100.dp)
+            )
+
+            // Display "Feels Like" temperature
+            Text(
+                text = "Feels Like: $feelsLikeTemp°F",
+                fontSize = 16.sp,
+                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+            )
+
+            // Display minimum and maximum temperature
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Text(
+                    text = "Min Temp: $minTemp°F",
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text(
+                    text = "Max Temp: $maxTemp°F",
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun WeatherBox(
+    conditions: String,
+    currTemp: Int,
+    minTemp: Int,
+    maxTemp: Int,
+    feelsLikeTemp: Int,
+    weatherIconUrl: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.medium
+    ) {
+        TodayWeather(
+            conditions = conditions,
+            currTemp = currTemp,
+            minTemp = minTemp,
+            maxTemp = maxTemp,
+            feelsLikeTemp = feelsLikeTemp,
+            weatherIconUrl = weatherIconUrl
+        )
+    }
+}
 
 
 @Composable
@@ -117,102 +253,6 @@ fun LocationSection(location: String, onClick: () -> Unit) {
 
 
 
-@OptIn(ExperimentalGlideComposeApi::class)
-@Composable
-fun TodayWeather(
-    conditions: String,
-    currTemp: Int,
-    feelsLikeTemp: Int,
-    minTemp: Int,
-    maxTemp: Int,
-    weatherIconUrl: String,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .padding(16.dp)
-            .background(color = Color.Blue.copy(alpha = 0.5f), shape = MaterialTheme.shapes.medium)
-            .padding(16.dp)
-    ) {
-
-        // Display today's weather conditions
-        Text(
-            text = "Today's Weather: $conditions",
-            fontSize = 20.sp,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        // Display current temperature
-        Text(
-            text = "Current Temperature: $currTemp°F",
-            fontSize = 24.sp,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        // Display weather icon using GlideImage
-        GlideImage(
-            model = weatherIconUrl,
-            contentDescription = "Weather Icon",
-            modifier = Modifier.size(100.dp)
-        )
-
-        // Display "Feels Like" temperature
-        Text(
-            text = "Feels Like: $feelsLikeTemp°F",
-            fontSize = 16.sp,
-            modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
-        )
-
-
-
-        // Display minimum and maximum temperature
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(top = 8.dp)
-        ) {
-            Text(
-                text = "Min Temp: $minTemp°F",
-                fontSize = 14.sp,
-                modifier = Modifier.padding(end = 8.dp)
-            )
-            Text(
-                text = "Max Temp: $maxTemp°F",
-                fontSize = 14.sp,
-                modifier = Modifier.padding(end = 8.dp)
-            )
-        }
-    }
-}
-
-
-@Composable
-fun WeatherBox(
-    conditions: String,
-    currTemp: Int,
-    minTemp: Int,
-    maxTemp: Int,
-    feelsLikeTemp: Int,
-    weatherIconUrl: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        shape = MaterialTheme.shapes.medium,
-        modifier = modifier.clickable(onClick = onClick)
-    ) {
-        TodayWeather(
-            conditions = conditions,
-            currTemp = currTemp,
-            minTemp = minTemp,
-            maxTemp = maxTemp,
-            feelsLikeTemp = feelsLikeTemp,
-            weatherIconUrl = weatherIconUrl
-        )
-    }
-}
-
 @Composable
 fun ForecastBox(onClick: () -> Unit) {
     Surface(
@@ -223,19 +263,20 @@ fun ForecastBox(onClick: () -> Unit) {
             .padding(16.dp)
     ) {
         Text(
-            text = "X-Day Forecast",
+            text = "48-HR Forecast",
             fontSize = 20.sp,
+            textAlign = TextAlign.Center,
             modifier = Modifier.padding(16.dp)
         )
     }
 }
 
-
-
 @Preview
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+    // Create a NavHostController instance
+    val navController = rememberNavController()
+
+    // Pass the NavHostController to the HomeScreen composable
+    HomeScreen(navController = navController)
 }
-
-

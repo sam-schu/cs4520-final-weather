@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppNavHost(
                 modifier = Modifier.fillMaxSize(),
-                viewModel(),
+                viewModel = viewModel(),
                 navController = rememberNavController()
             )
         }
