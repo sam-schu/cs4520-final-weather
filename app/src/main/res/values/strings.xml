@@ -3,6 +3,13 @@
     <string-array name="location_options">
         <item>Boston, MA</item>
         <item>New York, NY</item>
+        <item>San Francisco, CA</item>
+        <item>São Paulo, Brazil</item>
         <item>London, UK</item>
+        <item>Paris, France</item>
+        <item>Rome, Italy</item>
+        <item>Cape Town, South Africa</item>
+        <item>Tokyo, Japan</item>
+        <item>Sydney, Australia</item>
     </string-array>
 </resources>

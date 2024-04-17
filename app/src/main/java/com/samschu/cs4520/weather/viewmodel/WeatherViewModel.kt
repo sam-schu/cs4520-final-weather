@@ -130,7 +130,8 @@ class WeatherViewModel: ViewModel() {
         // Must correspond with the options for selecting a new location
         // (in the same order)
         val LOCATION_SPECIFIERS = arrayOf(
-            "Boston", "New York", "London"
+            "Boston", "New York", "San Francisco", "Sao Paulo",
+            "London", "Paris", "Rome", "Cape Town", "Tokyo", "Sydney"
         )
     }
 }
