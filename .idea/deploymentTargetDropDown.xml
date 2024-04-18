@@ -5,19 +5,19 @@
       <entry key="All Tests">
         <State />
       </entry>
+      <entry key="HomeScreenTest">
+        <State />
+      </entry>
       <entry key="app">
         <State />
       </entry>
-      <entry key="testAllHourValuesDisplayed()">
+      <entry key="testButtonClickActions()">
         <State />
       </entry>
       <entry key="testDetailedWeatherComponentsDisplayed()">
         <State />
       </entry>
       <entry key="testMainWeatherComponentsDisplayed()">
-        <State />
-      </entry>
-      <entry key="testUpdatingLocation()">
         <State />
       </entry>
     </value>

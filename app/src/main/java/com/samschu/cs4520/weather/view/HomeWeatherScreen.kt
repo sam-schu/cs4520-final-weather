@@ -17,6 +17,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import androidx.compose.foundation.Image
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.style.TextAlign
@@ -47,7 +48,7 @@ fun HomeScreen(
         )
 
         // Trigger navigation to the Location screen when LocationSection is clicked
-        LocationSection(location = locationOptions[viewModel.currentLocationIndex.value]) {
+        LocationSection(location = locationOptions[viewModel.currentLocationIndex.intValue]) {
             navController.navigate(NavigationItem.Location.route)
         }
 
@@ -209,6 +210,7 @@ fun TodayInfoBox(onClick: () -> Unit) {
                 .size(50.dp) // Set the size of the box to match the image dimensions
                 .clickable(onClick = onClick)
                 .padding(16.dp)
+                .testTag("info icon")
         ) {
             Image(
                 painter = painterResource(id = R.drawable.info),
