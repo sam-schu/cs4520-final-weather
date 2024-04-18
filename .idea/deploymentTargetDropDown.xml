@@ -5,16 +5,16 @@
       <entry key="All Tests">
         <State />
       </entry>
-      <entry key="HourlyScreenPreview">
-        <State />
-      </entry>
       <entry key="app">
         <State />
       </entry>
-      <entry key="test48HoursDisplayed()">
+      <entry key="testAllHourValuesDisplayed()">
         <State />
       </entry>
-      <entry key="testAllHourValuesDisplayed()">
+      <entry key="testDetailedWeatherComponentsDisplayed()">
+        <State />
+      </entry>
+      <entry key="testMainWeatherComponentsDisplayed()">
         <State />
       </entry>
       <entry key="testUpdatingLocation()">
