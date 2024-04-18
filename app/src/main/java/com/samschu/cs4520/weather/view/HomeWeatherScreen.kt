@@ -18,6 +18,7 @@ import com.bumptech.glide.integration.compose.GlideImage
 import androidx.compose.foundation.Image
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -33,7 +34,7 @@ fun HomeScreen(
 ) {
     val currentWeatherData = viewModel.currentWeatherData.value
     val dailyWeatherData = viewModel.dailyWeatherData.value
-
+    val locationOptions = stringArrayResource(R.array.location_options)
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
@@ -46,9 +47,10 @@ fun HomeScreen(
         )
 
         // Trigger navigation to the Location screen when LocationSection is clicked
-        LocationSection(location = "New York") {
+        LocationSection(location = locationOptions[viewModel.currentLocationIndex.value]) {
             navController.navigate(NavigationItem.Location.route)
         }
+
 
         // Trigger navigation to the TodayWeatherDetailsScreen when TodayInfoBox is clicked
         TodayInfoBox {

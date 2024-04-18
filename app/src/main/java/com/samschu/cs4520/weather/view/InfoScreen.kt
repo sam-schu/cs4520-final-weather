@@ -1,10 +1,10 @@
 package com.samschu.cs4520.weather.view
 
 import androidx.compose.foundation.background
+import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,14 +17,12 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.samschu.cs4520.weather.viewmodel.WeatherDataResult
 import com.samschu.cs4520.weather.viewmodel.WeatherViewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Composable
 fun TodayWeatherDetailsScreen(vm: WeatherViewModel = viewModel()) {
     val currentWeatherData = vm.currentWeatherData.value
     val dailyWeatherData = vm.dailyWeatherData.value
+    val weatherData = vm.weatherData.value
 
     Column(
         modifier = Modifier
@@ -59,19 +57,21 @@ fun TodayWeatherDetailsScreen(vm: WeatherViewModel = viewModel()) {
                 val dailyWeather = dailyWeatherData.data.firstOrNull()
 
                 if (dailyWeather != null) {
-                    WeatherDetailsBox(
-                        temperature = currentWeather.temp,
-                        feelsLikeTemperature = currentWeather.feelsLike,
-                        humidity = currentWeather.humidity,
-                        uvIndex = currentWeather.uvi,
-                        windSpeed = currentWeather.windSpeed,
-                        sunriseTime = formatTime(dailyWeather.sunrise),
-                        sunsetTime = formatTime(dailyWeather.sunset),
-                        maxTemperature = dailyWeather.temp.max,
-                        minTemperature = dailyWeather.temp.min,
-                        weatherIconUrl = "https://openweathermap.org/img/wn/${currentWeather.weather[0].icon}@2x.png",
-                        weatherDescription = currentWeather.weather[0].description // Pass weather description
-                    )
+                    if (weatherData != null) {
+                        WeatherDetailsBox(
+                            temperature = currentWeather.temp,
+                            feelsLikeTemperature = currentWeather.feelsLike,
+                            humidity = currentWeather.humidity,
+                            uvIndex = currentWeather.uvi,
+                            windSpeed = currentWeather.windSpeed,
+                            sunriseTime = vm.detailedFormatTime(dailyWeather.sunrise + weatherData.timezoneOffset),
+                            sunsetTime = vm.detailedFormatTime(dailyWeather.sunset + weatherData.timezoneOffset),
+                            maxTemperature = dailyWeather.temp.max,
+                            minTemperature = dailyWeather.temp.min,
+                            weatherIconUrl = "https://openweathermap.org/img/wn/${currentWeather.weather[0].icon}@2x.png",
+                            weatherDescription = currentWeather.weather[0].description // Pass weather description
+                        )
+                    }
                 } else {
                     Text(
                         text = "No daily weather data available.",
@@ -137,7 +137,7 @@ fun WeatherDetailsBox(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = "Wind Speed: $windSpeed m/s",
+                    text = "Wind Speed: $windSpeed mph",
                     fontSize = 16.sp,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
@@ -171,11 +171,6 @@ fun WeatherDetailsBox(
     }
 }
 
-fun formatTime(unixTimestamp: Int): String {
-    val date = Date(unixTimestamp * 1000L)
-    val sdf = SimpleDateFormat("h:mm a", Locale.getDefault())
-    return sdf.format(date)
-}
 
 @Preview(showBackground = true)
 @Composable
