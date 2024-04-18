@@ -2,16 +2,19 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="All Tests">
+        <State />
+      </entry>
       <entry key="ExampleInstrumentedTest">
         <State />
       </entry>
       <entry key="HourlyScreenPreview">
         <State />
       </entry>
-      <entry key="LocationScreenPreview">
+      <entry key="app">
         <State />
       </entry>
-      <entry key="app">
+      <entry key="test48HoursDisplayed()">
         <State />
       </entry>
       <entry key="testUpdatingLocation()">
