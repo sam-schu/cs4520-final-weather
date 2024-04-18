@@ -1,6 +1,8 @@
 package com.samschu.cs4520.weather.viewmodel
 
+import androidx.compose.runtime.IntState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -34,7 +36,7 @@ sealed interface WeatherDataResult<out T> {
 }
 
 class WeatherViewModel : ViewModel() {
-    private val _currentLocationIndex = mutableStateOf(0)
+    private val _currentLocationIndex = mutableIntStateOf(0)
     private val _currentWeatherData = mutableStateOf<WeatherDataResult<CurrentWeatherData>>(
         WeatherDataResult.Loading
     )
@@ -46,7 +48,7 @@ class WeatherViewModel : ViewModel() {
         WeatherDataResult.Loading
     )
 
-    val currentLocationIndex: State<Int> = _currentLocationIndex
+    val currentLocationIndex: IntState = _currentLocationIndex
     val currentWeatherData: State<WeatherDataResult<CurrentWeatherData>> =
         _currentWeatherData
     val hourlyWeatherData: State<WeatherDataResult<List<FormattedHourlyWeatherData>>> =
@@ -63,14 +65,14 @@ class WeatherViewModel : ViewModel() {
     }
 
     fun updateCurrentLocation(newLocationIndex: Int) {
-        _currentLocationIndex.value = newLocationIndex
+        _currentLocationIndex.intValue = newLocationIndex
         loadWeatherData()
     }
 
     fun loadWeatherData() {
         updateAllWeatherData(WeatherDataResult.Loading)
         val apiService = RetrofitBuilder.getRetrofit().create(ApiService::class.java)
-        val locationSpecifier = LOCATION_SPECIFIERS[_currentLocationIndex.value]
+        val locationSpecifier = LOCATION_SPECIFIERS[_currentLocationIndex.intValue]
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val (lat, lon) = apiService.getCoordinates(locationSpecifier).first()
@@ -139,7 +141,6 @@ class WeatherViewModel : ViewModel() {
             }.format(it)
         }
 
-
     private fun updateAllWeatherData(value: WeatherDataResult<Nothing>) {
         _currentWeatherData.value = value
         _hourlyWeatherData.value = value
@@ -150,7 +151,8 @@ class WeatherViewModel : ViewModel() {
         // Must correspond with the options for selecting a new location
         // (in the same order)
         val LOCATION_SPECIFIERS = arrayOf(
-            "Boston", "New York", "London"
+            "Boston", "New York", "San Francisco", "Sao Paulo",
+            "London", "Paris", "Rome", "Cape Town", "Tokyo", "Sydney"
         )
     }
 }
