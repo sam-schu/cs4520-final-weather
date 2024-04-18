@@ -78,10 +78,8 @@ class WeatherViewModel : ViewModel() {
                 val (lat, lon) = apiService.getCoordinates(locationSpecifier).first()
                 val weatherData = apiService.getWeatherData(lat, lon)
 
-                // Update _weatherData
-                _weatherData.value = weatherData
-
                 withContext(Dispatchers.Main) {
+                    _weatherData.value = weatherData
                     _currentWeatherData.value = WeatherDataResult.Success(weatherData.current)
                     _hourlyWeatherData.value = WeatherDataResult.Success(
                         weatherData.hourly.map {
@@ -119,7 +117,7 @@ class WeatherViewModel : ViewModel() {
     // Returns a string in the device locale in the form of "12 AM"
     // or "1 PM" representing the given UNIX timestamp (in seconds),
     // without performing any time zone conversions.
-    fun getFormattedTime(unixTimestampSeconds: Int): String =
+    private fun getFormattedTime(unixTimestampSeconds: Int): String =
         // Note: The time zone is not set to UTC because we want the
         // time to be displayed in UTC, but because this will disable
         // automatic time zone conversion (since the Date class

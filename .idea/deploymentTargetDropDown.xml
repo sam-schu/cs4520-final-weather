@@ -5,9 +5,6 @@
       <entry key="All Tests">
         <State />
       </entry>
-      <entry key="ExampleInstrumentedTest">
-        <State />
-      </entry>
       <entry key="HourlyScreenPreview">
         <State />
       </entry>
@@ -15,6 +12,9 @@
         <State />
       </entry>
       <entry key="test48HoursDisplayed()">
+        <State />
+      </entry>
+      <entry key="testAllHourValuesDisplayed()">
         <State />
       </entry>
       <entry key="testUpdatingLocation()">
